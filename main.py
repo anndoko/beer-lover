@@ -34,3 +34,21 @@ def make_request_using_cache(url):
         return CACHE_DICTION[unique_ident]
 
 # ---------- Web Scraping & Crawling ----------
+# Craft Beer and Brewing Magazine - Beer Reviews:
+all_reviews_url = "https://beerandbrewing.com/cbb-beer-reviews/top/IPA"
+
+text = make_request_using_cache(all_reviews_url)
+soup = BeautifulSoup(text, "html.parser")
+
+# Table 1. Styles: Id, Name
+node_lst = []
+
+menu_items = soup.find_all(class_ = "pure-menu-item")
+for item in menu_items:
+    link = item.find("a")["href"]
+    if "cbb-beer-reviews" in link:
+        category_node = item.find("a")["href"]
+        category_name = item.find("a").string[4:]
+        node_lst.append(category_node)
+
+# Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
