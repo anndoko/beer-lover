@@ -35,20 +35,35 @@ def make_request_using_cache(url):
 
 # ---------- Web Scraping & Crawling ----------
 # Craft Beer and Brewing Magazine - Beer Reviews:
-all_reviews_url = "https://beerandbrewing.com/cbb-beer-reviews/top/IPA"
+baseurl = "https://beerandbrewing.com"
 
-text = make_request_using_cache(all_reviews_url)
+text = make_request_using_cache(baseurl)
 soup = BeautifulSoup(text, "html.parser")
 
 # Table 1. Styles: Id, Name
-node_lst = []
-
+style_lst = {}
 menu_items = soup.find_all(class_ = "pure-menu-item")
 for item in menu_items:
     link = item.find("a")["href"]
     if "cbb-beer-reviews" in link:
-        category_node = item.find("a")["href"]
-        category_name = item.find("a").string[4:]
-        node_lst.append(category_node)
+        style_node = item.find("a")["href"]
+        style_name = item.find("a").string[4:]
+        style_dic[style_name] = style_node
+
 
 # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
+review_node_lst = []
+for style in style_dic:
+    style_node = style_dic[style]
+
+    # Form the link
+    review_url = baseurl + style_node
+
+    # BeautifulSoup
+    text = make_request_using_cache(review_url)
+    soup = BeautifulSoup(text, "html.parser")
+
+    # Get the node & Add to the list
+    article_card_items = soup.find_all("h3")
+    for item in article_card_items:
+        review_node_lst.append(item.parent["href"])
