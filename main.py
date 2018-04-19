@@ -80,6 +80,7 @@ for node in review_node_lst:
     # Scrape the page
     beer_dic = {
         "Name": "N/A",
+        "Image": "N/A",
         "Rating": "N/A",
         "Aroma": "N/A",
         "Appearance": "N/A",
@@ -95,6 +96,9 @@ for node in review_node_lst:
 
     # Name
     beer_dic["Name"] = soup.find("h1").text
+
+    # Image
+    beer_dic["Image"] = "https:" + soup.find(class_ = "article-main-image")["src"]
 
     # Rating
     beer_dic["Rating"] = int(soup.find(class_ = "main-score-overall rating").text[0:2])
