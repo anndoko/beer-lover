@@ -304,7 +304,33 @@ def init_db_beer_data(lst):
         cur.execute(statement, [beer.name, beer.image, beer.rating, beer.aroma, beer.appearance, beer.flavor, beer.mouthfeel, beer.style_detail, beer.style_id, beer.abv, beer.ibu, beer.aroma_comment, beer.flavor_comment, beer.overall_comment])
         conn.commit()
 
-# -----------------------------------
+# ---------- Interactive ----------
+# Process the command
+def process_command(response):
+    pass
+
+# Show the menu
+def load_menu_text():
+    with open('menu.txt') as f:
+        return f.read()
+
+# Interaction
+def interactive_prompt():
+    menu_text = load_menu_text()
+    response = ''
+    while response != 'exit':
+        response = input('Enter a command: ')
+
+        try:
+            results = process_command(response)
+        except:
+            continue
+
+        if response == 'menu':
+            print(menu_text)
+            continue
+
+# ---------- Program ----------
 if __name__=="__main__":
     # Run the functions to crawl & scrape the website
     style_data = get_style_data()
@@ -316,3 +342,6 @@ if __name__=="__main__":
     # Run the functions to insert data
     init_db_style_data(style_data)
     init_db_beer_data(beer_data)
+
+    # Start the interaction
+    interactive_prompt()
