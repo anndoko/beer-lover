@@ -103,7 +103,7 @@ for node in review_node_lst[:20]:
         elif label == "Mouthfeel":
             beer_dic["Mouthfeel"] = value
 
-    # Style
+    # Style, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
     strong_item = soup.find_all("strong")
     for item in strong_item:
         if item.string == "Style:":
