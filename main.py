@@ -20,6 +20,8 @@ class Beer:
         self.flavor = data_dic['Flavor']
         self.mouthfeel = data_dic['Mouthfeel']
         self.style = data_dic['Style']
+        self.style_id = 0
+        self.style_detail = data_dic['StyleDetail']
         self.abv = data_dic['ABV']
         self.ibu = data_dic['IBU']
         self.aroma_comment = data_dic['AromaComment']
@@ -79,8 +81,9 @@ for item in menu_items:
         style_data_lst.append(Style(style_dic))
 
 # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
-review_node_lst = []
+review_node_dic = {}
 for style_obj in style_data_lst:
+    style_name = style_obj.name
     style_node = style_obj.node
 
     # Form the link
@@ -91,98 +94,109 @@ for style_obj in style_data_lst:
     soup = BeautifulSoup(text, 'html.parser')
 
     # Get the node & Add to the list
+
+    review_node_lst = []
     article_card_items = soup.find_all('h3')
     for item in article_card_items:
         review_node_lst.append(item.parent['href'])
+    review_node_dic[style_name] = review_node_lst
 
-
-# Go to each review page & scrape
 beer_data_lst = []
-for node in review_node_lst[:100]:
-    # Form the link
-    url = baseurl + node
+for lst in review_node_dic:
+    for node in review_node_dic[lst]:
 
-    # BeautifulSoup
-    text = make_request_using_cache(url)
-    soup = BeautifulSoup(text, 'html.parser')
+        # Go to each review page & scrape
+        # Form the link
+        url = baseurl + node
 
-    # Scrape the page
-    beer_dic = {
-        'Name': 'N/A',
-        'Image': 'N/A',
-        'Rating': 'N/A',
-        'Aroma': 'N/A',
-        'Appearance': 'N/A',
-        'Flavor': 'N/A',
-        'Mouthfeel': 'N/A',
-        'Style': 'N/A',
-        'ABV': 'N/A',
-        'IBU': 'N/A',
-        'AromaComment': 'N/A',
-        'FlavorComment': 'N/A',
-        'OverallComment': 'N/A'
-    }
+        # BeautifulSoup
+        text = make_request_using_cache(url)
+        soup = BeautifulSoup(text, 'html.parser')
 
-    # Name
-    beer_dic['Name'] = soup.find('h1').text
+        # Scrape the page
+        beer_dic = {
+            'Name': 'N/A',
+            'Image': 'N/A',
+            'Rating': 'N/A',
+            'Aroma': 'N/A',
+            'Appearance': 'N/A',
+            'Flavor': 'N/A',
+            'Mouthfeel': 'N/A',
+            'Style': 'N/A',
+            'StyleDetail': 'N/A',
+            'ABV': 'N/A',
+            'IBU': 'N/A',
+            'AromaComment': 'N/A',
+            'FlavorComment': 'N/A',
+            'OverallComment': 'N/A'
+        }
 
-    # Image
-    try:
-        beer_dic['Image'] = 'https:' + soup.find(class_ = 'article-main-image')['src']
-    except:
-        continue
+        # Style
+        beer_dic["Style"] = lst
 
-    # Rating
-    beer_dic['Rating'] = int(soup.find(class_ = 'main-score-overall rating').text[0:2])
+        # Name
+        beer_dic['Name'] = soup.find('h1').text
 
-    # Table: Aroma, Appearance, Flavor, Mouthfeel
-    label_items = soup.find_all('tr')
-    for item in label_items:
-        # label and value
-        label = item.find_all(class_ = 'table-label')[0].text.replace(':', '')
-        value = item.find_all(class_ = 'table-label')[1].text[0:2].replace('\n', '')
+        # Image
+        try:
+            beer_dic['Image'] = 'https:' + soup.find(class_ = 'article-main-image')['src']
+        except:
+            continue
 
-        if label == 'Aroma':
-            beer_dic['Aroma'] = int(value)
-        elif label == 'Appearance':
-            beer_dic['Appearance'] = int(value)
-        elif label == 'Flavor':
-            beer_dic['Flavor'] = int(value)
-        elif label == 'Mouthfeel':
-            beer_dic['Mouthfeel'] = int(value)
+        # Rating
+        beer_dic['Rating'] = int(soup.find(class_ = 'main-score-overall rating').text[0:2])
 
-    # Style, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
-    strong_items = soup.find_all('strong')
-    for item in strong_items:
-        if item.string == 'Style:':
-            beer_dic['Style'] = item.parent.text.replace('Style: ', '')
-        elif item.string == 'ABV:':
-            try:
-                beer_dic['ABV'] = int(item.parent.text.replace('\n', '').split()[1])
-            except:
-                continue
-        elif item.string == 'IBU:':
-            try:
-                beer_dic['IBU'] = int(item.parent.text.replace('\n', '').split()[3])
-            except:
-                continue
-        elif item.string == 'Aroma:':
-            try:
-                beer_dic['AromaComment'] = item.parent.text
-            except:
-                continue
-        elif item.string == 'Flavor:':
-            try:
-                beer_dic['FlavorComment'] = item.parent.text
-            except:
-                continue
-        elif item.string == 'Overall:':
-            try:
-                beer_dic['OverallComment'] = item.parent.text
-            except:
-                continue
+        # Table: Aroma, Appearance, Flavor, Mouthfeel
+        label_items = soup.find_all('tr')
+        for item in label_items:
+            # label and value
+            label = item.find_all(class_ = 'table-label')[0].text.replace(':', '')
+            value = item.find_all(class_ = 'table-label')[1].text[0:2].replace('\n', '')
 
-    beer_data_lst.append(Beer(beer_dic))
+            if label == 'Aroma':
+                beer_dic['Aroma'] = int(value)
+            elif label == 'Appearance':
+                beer_dic['Appearance'] = int(value)
+            elif label == 'Flavor':
+                beer_dic['Flavor'] = int(value)
+            elif label == 'Mouthfeel':
+                beer_dic['Mouthfeel'] = int(value)
+
+        # StyleDetail, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
+        strong_items = soup.find_all('strong')
+        for item in strong_items:
+            if item.string == 'Style:':
+                beer_dic['StyleDetail'] = item.parent.text.replace('Style: ', '')
+            elif item.string == 'ABV:':
+                try:
+                    beer_dic['ABV'] = int(item.parent.text.replace('\n', '').split()[1])
+                except:
+                    continue
+            elif item.string == 'IBU:':
+                try:
+                    beer_dic['IBU'] = int(item.parent.text.replace('\n', '').split()[3])
+                except:
+                    continue
+            elif item.string == 'Aroma:':
+                try:
+                    beer_dic['AromaComment'] = item.parent.text
+                except:
+                    continue
+            elif item.string == 'Flavor:':
+                try:
+                    beer_dic['FlavorComment'] = item.parent.text
+                except:
+                    continue
+            elif item.string == 'Overall:':
+                try:
+                    beer_dic['OverallComment'] = item.parent.text
+                except:
+                    continue
+
+        beer_data_lst.append(Beer(beer_dic))
+
+# for beer in beer_data_lst:
+#     print(beer.style)
 
 # ---------- Database ----------
 DBNAME = 'beer.db'
@@ -266,6 +280,7 @@ def init_db_style_data(lst):
         cur.execute(statement, [style.name])
         conn.commit()
 
+# Insert data into the Beer table
 def init_db_beer_data(lst):
     for beer in lst:
         try:
@@ -275,12 +290,23 @@ def init_db_beer_data(lst):
             print('Failure. Please try again.')
 
         statement = '''
-            INSERT INTO Beers(Name, Image, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU, AromaComment, FlavorComment, OverallComment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            SELECT Id, Name
+            FROM Styles
+        '''
+        style_data = cur.execute(statement).fetchall()
+        for style in style_data:
+            if beer.style == style[1]:
+                beer.style_id = style[0]
+
+
+        statement = '''
+            INSERT INTO Beers(Name, Image, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, StyleId, ABV, IBU, AromaComment, FlavorComment, OverallComment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
 
-        cur.execute(statement, [beer.name, beer.image, beer.rating, beer.aroma, beer.appearance, beer.flavor, beer.mouthfeel, beer.style, beer.abv, beer.ibu, beer.aroma_comment, beer.flavor_comment, beer.overall_comment])
+        cur.execute(statement, [beer.name, beer.image, beer.rating, beer.aroma, beer.appearance, beer.flavor, beer.mouthfeel, beer.style_detail, beer.style_id, beer.abv, beer.ibu, beer.aroma_comment, beer.flavor_comment, beer.overall_comment])
         conn.commit()
 
+# -----------------------------------
 # Run the function to create database
 init_db_tables()
 # Run the function to insert data
