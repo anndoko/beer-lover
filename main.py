@@ -69,7 +69,7 @@ for style in style_dic:
         review_node_lst.append(item.parent["href"])
 
 # Go to each review page & scrape
-for node in review_node_lst[:20]:
+for node in review_node_lst:
     # Form the link
     url = baseurl + node
 
@@ -78,7 +78,20 @@ for node in review_node_lst[:20]:
     soup = BeautifulSoup(text, "html.parser")
 
     # Scrape the page
-    beer_dic = {}
+    beer_dic = {
+        "Name": "N/A",
+        "Rating": "N/A",
+        "Aroma": "N/A",
+        "Appearance": "N/A",
+        "Flavor": "N/A",
+        "Mouthfeel": "N/A",
+        "Style": "N/A",
+        "ABV": "N/A",
+        "IBU": "N/A",
+        "AromaComment": "N/A",
+        "FlavorComment": "N/A",
+        "OverallComment": "N/A"
+    }
 
     # Name
     beer_dic["Name"] = soup.find("h1").text
@@ -108,15 +121,30 @@ for node in review_node_lst[:20]:
         if item.string == "Style:":
             beer_dic["Style"] = item.parent.text.replace("Style: ", "")
         elif item.string == "ABV:":
-            beer_dic["ABV"] = item.parent.text.replace("\n", "").split()[1]
+            try:
+                beer_dic["ABV"] = item.parent.text.replace("\n", "").split()[1]
+            except:
+                continue
         elif item.string == "IBU:":
-            beer_dic["IBU"] = item.parent.text.replace("\n", "").split()[3]
+            try:
+                beer_dic["IBU"] = item.parent.text.replace("\n", "").split()[3]
+            except:
+                continue
         elif item.string == "Aroma:":
-            beer_dic["AromaComment"] = item.parent.text
+            try:
+                beer_dic["AromaComment"] = item.parent.text
+            except:
+                continue
         elif item.string == "Flavor:":
-            beer_dic["FlavorComment"] = item.parent.text
+            try:
+                beer_dic["FlavorComment"] = item.parent.text
+            except:
+                continue
         elif item.string == "Overall:":
-            beer_dic["OverallComment"] = item.parent.text
+            try:
+                beer_dic["OverallComment"] = item.parent.text
+            except:
+                continue
 
     print(beer_dic)
     print("-"*10)
