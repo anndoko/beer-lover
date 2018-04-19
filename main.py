@@ -69,7 +69,7 @@ for style in style_dic:
         review_node_lst.append(item.parent["href"])
 
 # Go to each review page & scrape
-for node in review_node_lst[:3]:
+for node in review_node_lst[:20]:
     # Form the link
     url = baseurl + node
 
@@ -78,37 +78,46 @@ for node in review_node_lst[:3]:
     soup = BeautifulSoup(text, "html.parser")
 
     # Scrape the page
+    beer_dic = {}
 
     # Name
-    name = soup.find("h1").text
+    beer_dic["Name"] = soup.find("h1").text
 
     # Rating
-    rating = int(soup.find(class_ = "main-score-overall rating").text[0:2])
+    beer_dic["Rating"] = int(soup.find(class_ = "main-score-overall rating").text[0:2])
 
     # Table: Aroma, Appearance, Flavor, Mouthfeel
     table = soup.find_all("tr")
-    table_dic = {}
+
     for row in table:
         # label and value
         label = row.find_all(class_ = "table-label")[0].text.replace(":", "")
         value = row.find_all(class_ = "table-label")[1].text[0:2].replace("\n", "")
 
         if label == "Aroma":
-            table_dic["Aroma"] = value
+            beer_dic["Aroma"] = value
         elif label == "Appearance":
-            table_dic["Appearance"] = value
+            beer_dic["Appearance"] = value
         elif label == "Flavor":
-            table_dic["Flavor"] = value
+            beer_dic["Flavor"] = value
         elif label == "Mouthfeel":
-            table_dic["Mouthfeel"] = value
+            beer_dic["Mouthfeel"] = value
 
     # Style
-    # ABV
-    # IBU
-    # BrewerComment
-    # PanelComment
+    strong_item = soup.find_all("strong")
+    for item in strong_item:
+        if item.string == "Style:":
+            beer_dic["Style"] = item.parent.text.replace("Style: ", "")
+        elif item.string == "ABV:":
+            beer_dic["ABV"] = item.parent.text.replace("\n", "").split()[1]
+        elif item.string == "IBU:":
+            beer_dic["IBU"] = item.parent.text.replace("\n", "").split()[3]
+        elif item.string == "Aroma:":
+            beer_dic["AromaComment"] = item.parent.text
+        elif item.string == "Flavor:":
+            beer_dic["FlavorComment"] = item.parent.text
+        elif item.string == "Overall:":
+            beer_dic["OverallComment"] = item.parent.text
 
-    print(name)
-    print(rating)
-    print(table_dic)
+    print(beer_dic)
     print("-"*10)
