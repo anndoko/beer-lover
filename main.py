@@ -52,7 +52,7 @@ for item in menu_items:
 
     link = item.find("a")["href"]
     if "cbb-beer-reviews" in link:
-        style_dic["Name"] = item.find("a").string[4:][:-1]
+        style_dic["Name"] = item.find("a").string[4:]
         style_dic["Node"] = item.find("a")["href"]
         style_data_lst.append(style_dic)
 
@@ -166,6 +166,7 @@ for node in review_node_lst:
 # ---------- Database ----------
 DBNAME = 'beer.db'
 
+# Create DB & tables
 def init_db_tables():
     # Create db
     try:
@@ -181,7 +182,6 @@ def init_db_tables():
     cur.execute(statement)
     conn.commit()
 
-    # -- Create Table 1: Styles --
     statement = '''
         CREATE TABLE 'Styles' (
             'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -205,8 +205,6 @@ def init_db_tables():
     statement = '''
         CREATE TABLE 'Beers' (
             'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
-            'Name' TEXT NOT NULL
-        );
     '''
     try:
         cur.execute(statement)
@@ -214,6 +212,26 @@ def init_db_tables():
         print("Failure. Please try again.")
     conn.commit()
 
+# Insert data into the Style table
+def init_db_style_data(lst):
+    for item in lst:
+        name = item["Name"]
 
-# create database & insert data
+        try:
+            conn = sqlite3.connect(DBNAME)
+            cur = conn.cursor()
+        except:
+            print("Failure. Please try again.")
+
+        statement = '''
+            INSERT INTO Styles(Name) VALUES (?);
+        '''
+
+        cur.execute(statement, [name])
+        conn.commit()
+
+# Run the function to create database
 init_db_tables()
+# Run the function to insert data
+init_db_style_data(style_data_lst)
+init_db_style_data(style_beer_lst)
