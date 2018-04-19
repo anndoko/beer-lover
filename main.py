@@ -103,7 +103,7 @@ for style_obj in style_data_lst:
 
 beer_data_lst = []
 for lst in review_node_dic:
-    for node in review_node_dic[lst]:
+    for node in review_node_dic[lst][:3]:
 
         # Go to each review page & scrape
         # Form the link
@@ -168,15 +168,9 @@ for lst in review_node_dic:
             if item.string == 'Style:':
                 beer_dic['StyleDetail'] = item.parent.text.replace('Style: ', '')
             elif item.string == 'ABV:':
-                try:
-                    beer_dic['ABV'] = int(item.parent.text.replace('\n', '').split()[1])
-                except:
-                    continue
+                beer_dic['ABV'] = float(item.parent.text.replace('\n', '').split()[1])
             elif item.string == 'IBU:':
-                try:
-                    beer_dic['IBU'] = int(item.parent.text.replace('\n', '').split()[3])
-                except:
-                    continue
+                beer_dic['IBU'] = float(item.parent.text.replace('\n', '').split()[3])
             elif item.string == 'Aroma:':
                 try:
                     beer_dic['AromaComment'] = item.parent.text
