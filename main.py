@@ -41,15 +41,20 @@ text = make_request_using_cache(baseurl)
 soup = BeautifulSoup(text, "html.parser")
 
 # Table 1. Styles: Id, Name
-style_dic = {}
+style_data_lst = []
 menu_items = soup.find_all(class_ = "pure-menu-item")
 for item in menu_items:
+
+    style_dic = {
+        "Name": "N/A",
+        "Node": "N/A"
+    }
+
     link = item.find("a")["href"]
     if "cbb-beer-reviews" in link:
-        style_node = item.find("a")["href"]
-        style_name = item.find("a").string[4:]
-        style_dic[style_name] = style_node
-
+        style_dic["Name"] = item.find("a").string[4:][:-1]
+        style_dic["Node"] = item.find("a")["href"]
+        style_data_lst.append(style_dic)
 
 # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
 review_node_lst = []
@@ -69,6 +74,7 @@ for style in style_dic:
         review_node_lst.append(item.parent["href"])
 
 # Go to each review page & scrape
+beer_data_lst = []
 for node in review_node_lst:
     # Form the link
     url = baseurl + node
@@ -150,5 +156,52 @@ for node in review_node_lst:
             except:
                 continue
 
-    print(beer_dic)
-    print("-"*10)
+    # print(beer_dic)
+    # print("-"*10)
+    beer_data_lst.append(beer_dic)
+
+# ---------- Database ----------
+DBNAME = 'beer.db'
+
+def init_db_tables():
+    # Create db
+    try:
+        conn = sqlite3.connect(DBNAME)
+        cur = conn.cursor()
+    except:
+        print("Failure. Please try again.")
+
+    # Drop tables if they exist
+    statement = '''
+        DROP TABLE IF EXISTS 'Events';
+    '''
+    cur.execute(statement)
+    conn.commit()
+    # -- Create Table 1: Styles --
+    statement = '''
+        CREATE TABLE 'Styles' (
+            'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+            'Name' TEXT NOT NULL
+        );
+    '''
+    try:
+        cur.execute(statement)
+    except:
+        print("Failure. Please try again.")
+    conn.commit()
+
+    # -- Create Table 2: Beers --
+    statement = '''
+        CREATE TABLE 'Beers' (
+            'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+            'Name' TEXT NOT NULL
+        );
+    '''
+    try:
+        cur.execute(statement)
+    except:
+        print("Failure. Please try again.")
+    conn.commit()
+
+# create database & insert data
+init_db_tables()
