@@ -305,7 +305,42 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # ---------- Queries ----------
+def beer_query(style="", criteria="rating", sorting_order="top", limit="10"):
+    # Connect db
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
 
+    # -- Form the statement --
+    statement = "SELECT * "
+    statement += "FROM Beers "
+
+    # rating / abv
+    if criteria == "ratings":
+        statement += "ORDER BY {} ".format("Rating")
+    elif criteria == "abv":
+        statement += "ORDER BY {} ".format("ABV")
+
+    # top: DESC / bottom ASC
+    if sorting_order == "top":
+        statement += "{} ".format("DESC")
+    elif sorting_order == "bottom":
+        statement += "{} ".format("ASC")
+
+    # Limit
+    statement += "LIMIT {}".format(limit)
+
+    # Excute the statement
+    print(statement)
+
+    rows = cur.execute(statement).fetchall()
+    conn.commit()
+
+    # Add results to a list
+    results = []
+    for row in rows:
+        results.append(row)
+
+    return results
 
 
 # ---------- Interactive ----------
@@ -327,7 +362,7 @@ def process_command(command):
     command_dic = {
         "query_type": "",
         "style": "",
-        "criteria": "ratings",
+        "criteria": "rating",
         "sorting_order": "top",
         "limit": "10",
     }
@@ -355,8 +390,17 @@ def process_command(command):
 
     if if_valid == False:
         print("Command not recognized: ", command)
+
+    return command_dic
+
+def process_data(command_dic):
+    if command_dic["query_type"] == "beers":
+        print("Process data: beers")
+        beer_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
+    elif command_dic["query_type"] == "read-more":
+        print("Process data: read more")
     else:
-        return command_dic
+        print("Error. Please try again.")
 
 # Show the menu
 def load_menu_text():
@@ -369,7 +413,9 @@ def interactive_prompt():
     response = ''
     while response != 'exit':
         response = input('Enter a command: ')
-        results = process_command(response)
+
+        command = process_command(response)
+        data = process_data(command)
 
         if response == 'menu':
             print(menu_text)
