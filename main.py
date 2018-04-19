@@ -33,6 +33,28 @@ def make_request_using_cache(url):
         fw.close() # Close the open file
         return CACHE_DICTION[unique_ident]
 
+# ---------- Classes ----------
+class Style:
+    def __init__(self, data_dic = None):
+        self.name = data_dic["Name"]
+        self.node = data_dic["Node"]
+
+class Beer:
+    def __init__(self, data_dic = None):
+        self.name = data_dic["Name"]
+        self.image = data_dic["Image"]
+        self.rating = data_dic["Rating"]
+        self.aroma = data_dic["Aroma"]
+        self.appearance = data_dic["Appearance"]
+        self.flavor = data_dic["Flavor"]
+        self.mouthfeel = data_dic["Mouthfeel"]
+        self.style = data_dic["Style"]
+        self.abv = data_dic["ABV"]
+        self.ibu = data_dic["IBU"]
+        self.aroma_comment = data_dic["AromaComment"]
+        self.flavor_comment = data_dic["FlavorComment"]
+        self.overall_comment = data_dic["OverallComment"]
+
 # ---------- Web Scraping & Crawling ----------
 # Craft Beer and Brewing Magazine - Beer Reviews:
 baseurl = "https://beerandbrewing.com"
@@ -54,12 +76,12 @@ for item in menu_items:
     if "cbb-beer-reviews" in link:
         style_dic["Name"] = item.find("a").string[4:]
         style_dic["Node"] = item.find("a")["href"]
-        style_data_lst.append(style_dic)
+        style_data_lst.append(Style(style_dic))
 
 # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
 review_node_lst = []
-for style in style_data_lst:
-    style_node = style["Node"]
+for style_obj in style_data_lst:
+    style_node = style_obj.node
 
     # Form the link
     url = baseurl + style_node
@@ -73,9 +95,10 @@ for style in style_data_lst:
     for item in article_card_items:
         review_node_lst.append(item.parent["href"])
 
+
 # Go to each review page & scrape
 beer_data_lst = []
-for node in review_node_lst:
+for node in review_node_lst[:10]:
     # Form the link
     url = baseurl + node
 
@@ -159,9 +182,7 @@ for node in review_node_lst:
             except:
                 continue
 
-    # print(beer_dic)
-    # print("-"*10)
-    beer_data_lst.append(beer_dic)
+    beer_data_lst.append(Beer(beer_dic))
 
 # ---------- Database ----------
 DBNAME = 'beer.db'
@@ -194,28 +215,10 @@ def init_db_tables():
         print("Failure. Please try again.")
     conn.commit()
 
-    # -- Create Table 2: Beers --
-    # Drop tables if it exists
-    statement = '''
-        DROP TABLE IF EXISTS 'Beers';
-    '''
-    cur.execute(statement)
-    conn.commit()
-
-    statement = '''
-        CREATE TABLE 'Beers' (
-            'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
-    '''
-    try:
-        cur.execute(statement)
-    except:
-        print("Failure. Please try again.")
-    conn.commit()
-
 # Insert data into the Style table
 def init_db_style_data(lst):
-    for item in lst:
-        name = item["Name"]
+    for style_obj in lst:
+        name = style_obj.name
 
         try:
             conn = sqlite3.connect(DBNAME)
@@ -234,4 +237,3 @@ def init_db_style_data(lst):
 init_db_tables()
 # Run the function to insert data
 init_db_style_data(style_data_lst)
-init_db_style_data(style_beer_lst)
