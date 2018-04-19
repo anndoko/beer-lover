@@ -310,8 +310,53 @@ def init_db_beer_data(lst):
 
 # ---------- Interactive ----------
 # Process the command
-def process_command(response):
-    pass
+def process_command(command):
+    # Set if_valid to check if the command is valid
+    if_valid = True
+
+    # Lists of valid words
+    query_type_lst = ["beers", "read-more"]
+    style_lst = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    sorting_criteria_lst = ["rating", "abv"]
+    sorting_order_lst = ["top", "bottom"]
+
+    # -- Process the command line --
+    # Lower case the command & make it a list for processing
+    command_lst = command.lower().split()
+
+    command_dic = {
+        "query_type": "",
+        "style": "",
+        "criteria": "ratings",
+        "sorting_order": "top",
+        "limit": "10",
+    }
+
+    for command in command_lst:
+        # query type
+        if command in query_type_lst:
+            command_dic["query_type"] = command
+        # style
+        elif command in style_lst:
+            command_dic["style"] = command
+        # criteria
+        elif command in sorting_criteria_lst:
+            command_dic["criteria"] = command
+        # number of matches & specifications
+        elif "=" in command:
+            lst = command.split("=")
+            for ele in lst:
+                # top/bottom & limit
+                if ele in sorting_order_lst:
+                    command_dic["sorting_order"] = lst[0]
+                    command_dic["limit"] = lst[1]
+        else:
+            if_valid = False
+
+    if if_valid == False:
+        print("Command not recognized: ", command)
+    else:
+        return command_dic
 
 # Show the menu
 def load_menu_text():
@@ -324,11 +369,7 @@ def interactive_prompt():
     response = ''
     while response != 'exit':
         response = input('Enter a command: ')
-
-        try:
-            results = process_command(response)
-        except:
-            continue
+        results = process_command(response)
 
         if response == 'menu':
             print(menu_text)
@@ -336,16 +377,16 @@ def interactive_prompt():
 
 # ---------- Program ----------
 if __name__=="__main__":
-    # Run the functions to crawl & scrape the website
-    style_data = get_style_data()
-    beer_data = get_beer_data(style_data)
-
-    # Run the function to create database
-    init_db_tables()
-
-    # Run the functions to insert data
-    init_db_style_data(style_data)
-    init_db_beer_data(beer_data)
+    # # Run the functions to crawl & scrape the website
+    # style_data = get_style_data()
+    # beer_data = get_beer_data(style_data)
+    #
+    # # Run the function to create database
+    # init_db_tables()
+    #
+    # # Run the functions to insert data
+    # init_db_style_data(style_data)
+    # init_db_beer_data(beer_data)
 
     # Start the interaction
     interactive_prompt()

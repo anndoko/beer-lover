@@ -5,17 +5,17 @@ beers
     * style=<#> [default: none]
     Specifies one of the following styles narrow down your search.
 
-      #1. IPAs
-      #2. Stouts
-      #3. Pales
-      #4. Sours
-      #5. Lagers
-      #6. Saisons
-      #7. Belgians
-      #8. Wheats
-      #9. Gluten Free
+      #1  IPAs
+      #2  Stouts
+      #3  Pales
+      #4  Sours
+      #5  Lagers
+      #6  Saisons
+      #7  Belgians
+      #8  Wheats
+      #9  Gluten Free
 
-    * ratings | ABV [default: ratings]
+    * rating | ABV [default: ratings]
     Specifies whether to sort by rating or ABV (Alcohol by Volume)
 
     * top=<limit> | bottom=<limit> [default: top=10]
