@@ -87,12 +87,11 @@ for node in review_node_lst[:20]:
     beer_dic["Rating"] = int(soup.find(class_ = "main-score-overall rating").text[0:2])
 
     # Table: Aroma, Appearance, Flavor, Mouthfeel
-    table = soup.find_all("tr")
-
-    for row in table:
+    label_items = soup.find_all("tr")
+    for item in label_items:
         # label and value
-        label = row.find_all(class_ = "table-label")[0].text.replace(":", "")
-        value = row.find_all(class_ = "table-label")[1].text[0:2].replace("\n", "")
+        label = item.find_all(class_ = "table-label")[0].text.replace(":", "")
+        value = item.find_all(class_ = "table-label")[1].text[0:2].replace("\n", "")
 
         if label == "Aroma":
             beer_dic["Aroma"] = value
@@ -104,8 +103,8 @@ for node in review_node_lst[:20]:
             beer_dic["Mouthfeel"] = value
 
     # Style, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
-    strong_item = soup.find_all("strong")
-    for item in strong_item:
+    strong_items = soup.find_all("strong")
+    for item in strong_items:
         if item.string == "Style:":
             beer_dic["Style"] = item.parent.text.replace("Style: ", "")
         elif item.string == "ABV:":
