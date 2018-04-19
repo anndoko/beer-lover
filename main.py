@@ -304,6 +304,10 @@ def init_db_beer_data(lst):
         cur.execute(statement, [beer.name, beer.image, beer.rating, beer.aroma, beer.appearance, beer.flavor, beer.mouthfeel, beer.style_detail, beer.style_id, beer.abv, beer.ibu, beer.aroma_comment, beer.flavor_comment, beer.overall_comment])
         conn.commit()
 
+# ---------- Queries ----------
+
+
+
 # ---------- Interactive ----------
 # Process the command
 def process_command(response):

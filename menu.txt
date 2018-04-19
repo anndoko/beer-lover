@@ -1,0 +1,32 @@
+Hello, Beer Lover!
+Here are the commands available:
+
+beers
+    * style=<#> [default: none]
+    Specifies one of the following styles narrow down your search.
+
+      #1. IPAs
+      #2. Stouts
+      #3. Pales
+      #4. Sours
+      #5. Lagers
+      #6. Saisons
+      #7. Belgians
+      #8. Wheats
+      #9. Gluten Free
+
+    * ratings | ABV [default: ratings]
+    Specifies whether to sort by rating or ABV (Alcohol by Volume)
+
+    * top=<limit> | bottom=<limit> [default: top=10]
+    Specifies whether to list the top <limit> matches or the
+    bottom <limit> matches.
+
+read-more
+    ! This command is only available if there is an active result set.
+
+    * index=<#> [default: 1]
+    Specifies which search result you would like to learn more.
+
+    * overall | aroma | flavor [default: overall]
+    Specifies which aspect you would like to learn more.
