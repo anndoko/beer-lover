@@ -305,11 +305,14 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # -----------------------------------
-# Run the functions to crawl & scrape the website
-style_data_lst = get_style_data()
-beer_data_lst = get_beer_data(style_data_lst)
-# Run the function to create database
-init_db_tables()
-# Run the functions to insert data
-init_db_style_data(style_data_lst)
-init_db_beer_data(beer_data_lst)
+if __name__=="__main__":
+    # Run the functions to crawl & scrape the website
+    style_data = get_style_data()
+    beer_data = get_beer_data(style_data)
+
+    # Run the function to create database
+    init_db_tables()
+
+    # Run the functions to insert data
+    init_db_style_data(style_data)
+    init_db_beer_data(beer_data)
