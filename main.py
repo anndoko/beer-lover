@@ -104,7 +104,10 @@ for node in review_node_lst:
     beer_dic["Name"] = soup.find("h1").text
 
     # Image
-    beer_dic["Image"] = "https:" + soup.find(class_ = "article-main-image")["src"]
+    try:
+        beer_dic["Image"] = "https:" + soup.find(class_ = "article-main-image")["src"]
+    except:
+        continue
 
     # Rating
     beer_dic["Rating"] = int(soup.find(class_ = "main-score-overall rating").text[0:2])
@@ -117,13 +120,13 @@ for node in review_node_lst:
         value = item.find_all(class_ = "table-label")[1].text[0:2].replace("\n", "")
 
         if label == "Aroma":
-            beer_dic["Aroma"] = value
+            beer_dic["Aroma"] = int(value)
         elif label == "Appearance":
-            beer_dic["Appearance"] = value
+            beer_dic["Appearance"] = int(value)
         elif label == "Flavor":
-            beer_dic["Flavor"] = value
+            beer_dic["Flavor"] = int(value)
         elif label == "Mouthfeel":
-            beer_dic["Mouthfeel"] = value
+            beer_dic["Mouthfeel"] = int(value)
 
     # Style, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
     strong_items = soup.find_all("strong")
@@ -132,12 +135,12 @@ for node in review_node_lst:
             beer_dic["Style"] = item.parent.text.replace("Style: ", "")
         elif item.string == "ABV:":
             try:
-                beer_dic["ABV"] = item.parent.text.replace("\n", "").split()[1]
+                beer_dic["ABV"] = int(item.parent.text.replace("\n", "").split()[1])
             except:
                 continue
         elif item.string == "IBU:":
             try:
-                beer_dic["IBU"] = item.parent.text.replace("\n", "").split()[3]
+                beer_dic["IBU"] = int(item.parent.text.replace("\n", "").split()[3])
             except:
                 continue
         elif item.string == "Aroma:":
@@ -171,12 +174,13 @@ def init_db_tables():
     except:
         print("Failure. Please try again.")
 
-    # Drop tables if they exist
+    # Drop tables if it exists
     statement = '''
-        DROP TABLE IF EXISTS 'Events';
+        DROP TABLE IF EXISTS 'Styles';
     '''
     cur.execute(statement)
     conn.commit()
+
     # -- Create Table 1: Styles --
     statement = '''
         CREATE TABLE 'Styles' (
@@ -191,6 +195,13 @@ def init_db_tables():
     conn.commit()
 
     # -- Create Table 2: Beers --
+    # Drop tables if it exists
+    statement = '''
+        DROP TABLE IF EXISTS 'Beers';
+    '''
+    cur.execute(statement)
+    conn.commit()
+
     statement = '''
         CREATE TABLE 'Beers' (
             'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -202,6 +213,7 @@ def init_db_tables():
     except:
         print("Failure. Please try again.")
     conn.commit()
+
 
 # create database & insert data
 init_db_tables()
