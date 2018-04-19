@@ -58,139 +58,144 @@ def make_request_using_cache(url):
         return CACHE_DICTION[unique_ident]
 
 # ---------- Web Scraping & Crawling ----------
-# Craft Beer and Brewing Magazine - Beer Reviews:
-baseurl = 'https://beerandbrewing.com'
-
-text = make_request_using_cache(baseurl)
-soup = BeautifulSoup(text, 'html.parser')
-
-# Table 1. Styles: Id, Name
-style_data_lst = []
-menu_items = soup.find_all(class_ = 'pure-menu-item')
-for item in menu_items:
-
-    style_dic = {
-        'Name': 'N/A',
-        'Node': 'N/A'
-    }
-
-    link = item.find('a')['href']
-    if 'cbb-beer-reviews' in link:
-        style_dic['Name'] = item.find('a').string[4:]
-        style_dic['Node'] = item.find('a')['href']
-        style_data_lst.append(Style(style_dic))
-
-# Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
-review_node_dic = {}
-for style_obj in style_data_lst:
-    style_name = style_obj.name
-    style_node = style_obj.node
-
-    # Form the link
-    url = baseurl + style_node
-
-    # BeautifulSoup
-    text = make_request_using_cache(url)
+def get_style_data():
+    # Craft Beer and Brewing Magazine - Beer Reviews:
+    baseurl = 'https://beerandbrewing.com'
+    text = make_request_using_cache(baseurl)
     soup = BeautifulSoup(text, 'html.parser')
 
-    # Get the node & Add to the list
+    # Table 1. Styles: Id, Name
+    style_data_lst = []
+    menu_items = soup.find_all(class_ = 'pure-menu-item')
+    for item in menu_items:
 
-    review_node_lst = []
-    article_card_items = soup.find_all('h3')
-    for item in article_card_items:
-        review_node_lst.append(item.parent['href'])
-    review_node_dic[style_name] = review_node_lst
+        style_dic = {
+            'Name': 'N/A',
+            'Node': 'N/A'
+        }
 
-beer_data_lst = []
-for lst in review_node_dic:
-    for node in review_node_dic[lst][:3]:
+        link = item.find('a')['href']
+        if 'cbb-beer-reviews' in link:
+            style_dic['Name'] = item.find('a').string[4:]
+            style_dic['Node'] = item.find('a')['href']
+            style_data_lst.append(Style(style_dic))
 
-        # Go to each review page & scrape
+    return style_data_lst
+
+def get_beer_data(style_data_lst):
+
+
+    # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
+    review_node_dic = {}
+    for style_obj in style_data_lst:
+        style_name = style_obj.name
+        style_node = style_obj.node
+
         # Form the link
-        url = baseurl + node
+        baseurl = 'https://beerandbrewing.com'
+        url = baseurl + style_node
 
         # BeautifulSoup
         text = make_request_using_cache(url)
         soup = BeautifulSoup(text, 'html.parser')
 
-        # Scrape the page
-        beer_dic = {
-            'Name': 'N/A',
-            'Image': 'N/A',
-            'Rating': 'N/A',
-            'Aroma': 'N/A',
-            'Appearance': 'N/A',
-            'Flavor': 'N/A',
-            'Mouthfeel': 'N/A',
-            'Style': 'N/A',
-            'StyleDetail': 'N/A',
-            'ABV': 'N/A',
-            'IBU': 'N/A',
-            'AromaComment': 'N/A',
-            'FlavorComment': 'N/A',
-            'OverallComment': 'N/A'
-        }
+        # Get the node & Add to the list
 
-        # Style
-        beer_dic["Style"] = lst
+        review_node_lst = []
+        article_card_items = soup.find_all('h3')
+        for item in article_card_items:
+            review_node_lst.append(item.parent['href'])
+        review_node_dic[style_name] = review_node_lst
 
-        # Name
-        beer_dic['Name'] = soup.find('h1').text
+    beer_data_lst = []
+    for lst in review_node_dic:
+        for node in review_node_dic[lst][:3]:
 
-        # Image
-        try:
-            beer_dic['Image'] = 'https:' + soup.find(class_ = 'article-main-image')['src']
-        except:
-            continue
+            # Go to each review page & scrape
+            # Form the link
+            url = baseurl + node
 
-        # Rating
-        beer_dic['Rating'] = int(soup.find(class_ = 'main-score-overall rating').text[0:2])
+            # BeautifulSoup
+            text = make_request_using_cache(url)
+            soup = BeautifulSoup(text, 'html.parser')
 
-        # Table: Aroma, Appearance, Flavor, Mouthfeel
-        label_items = soup.find_all('tr')
-        for item in label_items:
-            # label and value
-            label = item.find_all(class_ = 'table-label')[0].text.replace(':', '')
-            value = item.find_all(class_ = 'table-label')[1].text[0:2].replace('\n', '')
+            # Scrape the page
+            beer_dic = {
+                'Name': 'N/A',
+                'Image': 'N/A',
+                'Rating': 'N/A',
+                'Aroma': 'N/A',
+                'Appearance': 'N/A',
+                'Flavor': 'N/A',
+                'Mouthfeel': 'N/A',
+                'Style': 'N/A',
+                'StyleDetail': 'N/A',
+                'ABV': 'N/A',
+                'IBU': 'N/A',
+                'AromaComment': 'N/A',
+                'FlavorComment': 'N/A',
+                'OverallComment': 'N/A'
+            }
 
-            if label == 'Aroma':
-                beer_dic['Aroma'] = int(value)
-            elif label == 'Appearance':
-                beer_dic['Appearance'] = int(value)
-            elif label == 'Flavor':
-                beer_dic['Flavor'] = int(value)
-            elif label == 'Mouthfeel':
-                beer_dic['Mouthfeel'] = int(value)
+            # Style
+            beer_dic["Style"] = lst
 
-        # StyleDetail, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
-        strong_items = soup.find_all('strong')
-        for item in strong_items:
-            if item.string == 'Style:':
-                beer_dic['StyleDetail'] = item.parent.text.replace('Style: ', '')
-            elif item.string == 'ABV:':
-                beer_dic['ABV'] = float(item.parent.text.replace('\n', '').split()[1])
-            elif item.string == 'IBU:':
-                beer_dic['IBU'] = float(item.parent.text.replace('\n', '').split()[3])
-            elif item.string == 'Aroma:':
-                try:
-                    beer_dic['AromaComment'] = item.parent.text
-                except:
-                    continue
-            elif item.string == 'Flavor:':
-                try:
-                    beer_dic['FlavorComment'] = item.parent.text
-                except:
-                    continue
-            elif item.string == 'Overall:':
-                try:
-                    beer_dic['OverallComment'] = item.parent.text
-                except:
-                    continue
+            # Name
+            beer_dic['Name'] = soup.find('h1').text
 
-        beer_data_lst.append(Beer(beer_dic))
+            # Image
+            try:
+                beer_dic['Image'] = 'https:' + soup.find(class_ = 'article-main-image')['src']
+            except:
+                continue
 
-# for beer in beer_data_lst:
-#     print(beer.style)
+            # Rating
+            beer_dic['Rating'] = int(soup.find(class_ = 'main-score-overall rating').text[0:2])
+
+            # Table: Aroma, Appearance, Flavor, Mouthfeel
+            label_items = soup.find_all('tr')
+            for item in label_items:
+                # label and value
+                label = item.find_all(class_ = 'table-label')[0].text.replace(':', '')
+                value = item.find_all(class_ = 'table-label')[1].text[0:2].replace('\n', '')
+
+                if label == 'Aroma':
+                    beer_dic['Aroma'] = int(value)
+                elif label == 'Appearance':
+                    beer_dic['Appearance'] = int(value)
+                elif label == 'Flavor':
+                    beer_dic['Flavor'] = int(value)
+                elif label == 'Mouthfeel':
+                    beer_dic['Mouthfeel'] = int(value)
+
+            # StyleDetail, ABV, IBU, Descriptions (Aroma, Flavor, Overall)
+            strong_items = soup.find_all('strong')
+            for item in strong_items:
+                if item.string == 'Style:':
+                    beer_dic['StyleDetail'] = item.parent.text.replace('Style: ', '')
+                elif item.string == 'ABV:':
+                    beer_dic['ABV'] = float(item.parent.text.replace('\n', '').split()[1])
+                elif item.string == 'IBU:':
+                    beer_dic['IBU'] = float(item.parent.text.replace('\n', '').split()[3])
+                elif item.string == 'Aroma:':
+                    try:
+                        beer_dic['AromaComment'] = item.parent.text
+                    except:
+                        continue
+                elif item.string == 'Flavor:':
+                    try:
+                        beer_dic['FlavorComment'] = item.parent.text
+                    except:
+                        continue
+                elif item.string == 'Overall:':
+                    try:
+                        beer_dic['OverallComment'] = item.parent.text
+                    except:
+                        continue
+
+            beer_data_lst.append(Beer(beer_dic))
+
+    return beer_data_lst
 
 # ---------- Database ----------
 DBNAME = 'beer.db'
@@ -257,7 +262,6 @@ def init_db_tables():
         print('Failure. Please try again.')
     conn.commit()
 
-
 # Insert data into the Style table
 def init_db_style_data(lst):
     for style in lst:
@@ -301,8 +305,11 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # -----------------------------------
+# Run the functions to crawl & scrape the website
+style_data_lst = get_style_data()
+beer_data_lst = get_beer_data(style_data_lst)
 # Run the function to create database
 init_db_tables()
-# Run the function to insert data
+# Run the functions to insert data
 init_db_style_data(style_data_lst)
 init_db_beer_data(beer_data_lst)
