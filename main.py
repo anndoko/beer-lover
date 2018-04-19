@@ -58,8 +58,8 @@ for item in menu_items:
 
 # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
 review_node_lst = []
-for style in style_dic:
-    style_node = style_dic[style]
+for style in style_data_lst:
+    style_node = style["Node"]
 
     # Form the link
     url = baseurl + style_node
