@@ -2,10 +2,10 @@ Hello, Beer Lover!
 Here are the commands available:
 
 view-styles
-    Description:
+    View the bar chart that shows the data (Average ABV (Alcohol by Volume), Average Aroma, Average Flavor, Average Mouthfeel) of each style.
 
 view-reviews-%
-    Description:
+    View the pie chart that shows the percentage of each style (number of reviews/total numbers of reviews).
 
 beers
     * style=<#> [default: none]
