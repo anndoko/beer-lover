@@ -108,7 +108,7 @@ def get_beer_data(style_data_lst):
 
     beer_data_lst = []
     for lst in review_node_dic:
-        for node in review_node_dic[lst][:3]:
+        for node in review_node_dic[lst]:
 
             # Go to each review page & scrape
             # Form the link
@@ -175,7 +175,10 @@ def get_beer_data(style_data_lst):
                 elif item.string == 'ABV:':
                     beer_dic['ABV'] = float(item.parent.text.replace('\n', '').split()[1])
                 elif item.string == 'IBU:':
-                    beer_dic['IBU'] = float(item.parent.text.replace('\n', '').split()[3])
+                    try:
+                        beer_dic['IBU'] = float(item.parent.text.replace('\n', '').split()[3])
+                    except:
+                        continue
                 elif item.string == 'Aroma:':
                     try:
                         beer_dic['AromaComment'] = item.parent.text
@@ -447,7 +450,7 @@ def process_data(command_dic):
             print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
             index += 1
 
-    # ** Execute review_query & Output ** 
+    # ** Execute review_query & Output **
     elif command_dic["query_type"] == "read-review":
 
         results = review_query(command_dic["style"], command_dic["comment"], command_dic["limit"])
@@ -499,5 +502,5 @@ if __name__=="__main__":
     # init_db_style_data(style_data)
     # init_db_beer_data(beer_data)
 
-    # Start the interaction
+    Start the interaction
     interactive_prompt()
