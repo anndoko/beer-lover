@@ -123,6 +123,14 @@ class TestQueries(unittest.TestCase):
         # Check the returned list
         self.assertIs(type(results), list)
         self.assertEqual(len(results[0]), 9)
+        self.assertIs(type(results[0][0]), str)
+        self.assertIs(type(results[0][1]), int)
+        self.assertIs(type(results[0][2]), int)
+        self.assertIs(type(results[0][3]), int)
+        self.assertIs(type(results[0][4]), int)
+        self.assertIs(type(results[0][5]), int)
+        self.assertIs(type(results[0][6]), str)
+        self.assertIs(type(results[0][7]), float)
 
     def test_review_query(self):
         # Test data
@@ -131,6 +139,11 @@ class TestQueries(unittest.TestCase):
         # Check the returned list
         self.assertIs(type(results), list)
         self.assertEqual(len(results[0]), 4)
+        self.assertIs(type(results[0][0]), str)
+        self.assertIs(type(results[0][1]), int)
+        self.assertIs(type(results[0][2]), str)
+        self.assertIs(type(results[0][3]), str)
+
 
 
 unittest.main()
