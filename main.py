@@ -372,7 +372,6 @@ def review_query(style="", comment="overall", limit="10"):
     for row in rows:
         results.append(row)
 
-    print(statement)
     return results
 
 # ---------- Functions for Interactions ----------

@@ -116,10 +116,21 @@ class TestClasses(unittest.TestCase):
 
 # Queries
 class TestQueries(unittest.TestCase):
-    def test_beers_query(arg):
-        pass
+    def test_beers_query(self):
+        # Test data
+        results = beers_query()
 
-    def test_style_query(arg):
-        pass
+        # Check the returned list
+        self.assertIs(type(results), list)
+        self.assertEqual(len(results[0]), 9)
+
+    def test_review_query(self):
+        # Test data
+        results = review_query()
+
+        # Check the returned list
+        self.assertIs(type(results), list)
+        self.assertEqual(len(results[0]), 4)
+
 
 unittest.main()
