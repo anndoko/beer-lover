@@ -408,14 +408,18 @@ def process_data(command_dic):
         # Execute beers_query
         results = beers_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
 
-        # Output
+        # Template for the output
         template = "{0:2} {1:20} {2:20} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10}"
+
+        # Print column names
         print(template.format("#".center(2), "Name".center(20), "Style".center(20), "Rating".center(10), "Aroma".center(10), "Appearance".center(10), "Flavor".center(10), "Mouthfeel".center(10), "ABV".center(10), "IBU".center(10)))
+
+        # Print rows
+        index = 1
         for row in results:
             (Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU) = row
-            print(template.format("#".center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
-    elif command_dic["query_type"] == "read-more":
-        print("Process data: read more")
+            print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
+            index += 1
 
 # Show the menu
 def load_menu_text():
