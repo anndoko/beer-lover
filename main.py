@@ -305,6 +305,7 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # ---------- Queries ----------
+# Beers query
 def beers_query(style="", criteria="rating", sorting_order="top", limit="10"):
     # Connect db
     conn = sqlite3.connect(DBNAME)
@@ -344,6 +345,34 @@ def beers_query(style="", criteria="rating", sorting_order="top", limit="10"):
 
     return results
 
+# Review query
+def review_query(style="", comment="overall", limit="10"):
+    # Connect db
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # -- Form the statement --
+    statement = "SELECT Name, Rating, Style, {} ".format(comment.title() + "Comment")
+    statement += "FROM Beers "
+
+    # Style
+    if style != "":
+        statement += "WHERE StyleId = {} ".format(str(style))
+
+    # Limit
+    statement += "LIMIT {} ".format(limit)
+
+    # Excute the statement
+    rows = cur.execute(statement).fetchall()
+    conn.commit()
+
+    # Add results to a list
+    results = []
+    for row in rows:
+        results.append(row)
+
+    print(statement)
+    return results
 
 # ---------- Interactive ----------
 # Format the output
@@ -360,10 +389,11 @@ def process_command(command):
     if_valid = True
 
     # Lists of valid words
-    query_type_lst = ["beers", "read-more", "exit"]
+    query_type_lst = ["beers", "read-review", "exit"]
     style_lst = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     sorting_criteria_lst = ["rating", "abv"]
     sorting_order_lst = ["top", "bottom"]
+    comment_type_lst = ["overall", "aroma", "flavor"]
 
     # -- Process the command line --
     # Lower case the command & make it a list for processing
@@ -372,6 +402,7 @@ def process_command(command):
     command_dic = {
         "query_type": "",
         "style": "",
+        "comment": "overall",
         "criteria": "rating",
         "sorting_order": "top",
         "limit": "10",
@@ -384,6 +415,8 @@ def process_command(command):
         # criteria
         elif command in sorting_criteria_lst:
             command_dic["criteria"] = command
+        elif command in comment_type_lst:
+            command_dic["comment"] = command
         # number of matches & specifications
         elif "=" in command:
             lst = command.split("=")
@@ -419,6 +452,27 @@ def process_data(command_dic):
         for row in results:
             (Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU) = row
             print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
+            index += 1
+
+    elif command_dic["query_type"] == "read-review":
+        # Execute review_query
+        results = review_query(command_dic["style"], command_dic["comment"], command_dic["limit"])
+
+        # Template for the output
+        template = "{0:2} {1:20} {2:20} {3:20}"
+
+
+
+        # Print rows
+        index = 1
+        for row in results:
+            # Print column names
+            print(template.format("#".center(2), "Name".center(20), "Style".center(20), "Rating".center(10)))
+            # Print the rows            
+            (Name, Rating, Style, Comment) = row
+            print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10)))
+            print(" "*4, Comment)
+            print("-"*20)
             index += 1
 
 # Show the menu
