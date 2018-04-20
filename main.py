@@ -360,7 +360,7 @@ def process_command(command):
     if_valid = True
 
     # Lists of valid words
-    query_type_lst = ["beers", "read-more"]
+    query_type_lst = ["beers", "read-more", "exit"]
     style_lst = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     sorting_criteria_lst = ["rating", "abv"]
     sorting_order_lst = ["top", "bottom"]
@@ -395,7 +395,6 @@ def process_command(command):
                 elif ele in sorting_order_lst:
                     command_dic["sorting_order"] = lst[0]
                     command_dic["limit"] = lst[1]
-
         else:
             if_valid = False
 
@@ -415,11 +414,8 @@ def process_data(command_dic):
         for row in results:
             (Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU) = row
             print(template.format("#".center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
-
     elif command_dic["query_type"] == "read-more":
         print("Process data: read more")
-    else:
-        print("Error. Please try again.")
 
 # Show the menu
 def load_menu_text():
