@@ -58,13 +58,13 @@ def make_request_using_cache(url):
         return CACHE_DICTION[unique_ident]
 
 # ---------- Web Scraping & Crawling ----------
+# Table 1. Styles: Id, Name
 def get_style_data():
     # Craft Beer and Brewing Magazine - Beer Reviews:
     baseurl = 'https://beerandbrewing.com'
     text = make_request_using_cache(baseurl)
     soup = BeautifulSoup(text, 'html.parser')
 
-    # Table 1. Styles: Id, Name
     style_data_lst = []
     menu_items = soup.find_all(class_ = 'pure-menu-item')
     for item in menu_items:
@@ -82,10 +82,9 @@ def get_style_data():
 
     return style_data_lst
 
+# Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
 def get_beer_data(style_data_lst):
 
-
-    # Table 2. Beers: Id, Name, StyleId, ABV, IBU Rating, Description, Aroma, Appearance, Flavor, Mouthfeel
     review_node_dic = {}
     for style_obj in style_data_lst:
         style_name = style_obj.name
@@ -374,14 +373,7 @@ def review_query(style="", comment="overall", limit="10"):
     print(statement)
     return results
 
-# ---------- Interactive ----------
-# Format the output
-def str_output(string_output):
-    if len(string_output) > 12:
-        formatted_output = string_output[:12] + "..."
-    else:
-        formatted_output = string_output
-    return formatted_output
+# ---------- Functions for Interactions ----------
 
 # Process the command
 def process_command(command):
@@ -437,8 +429,9 @@ def process_command(command):
     return command_dic
 
 def process_data(command_dic):
+    # ** Execute beers_query & Output **
     if command_dic["query_type"] == "beers":
-        # Execute beers_query
+
         results = beers_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
 
         # Template for the output
@@ -454,21 +447,20 @@ def process_data(command_dic):
             print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
             index += 1
 
+    # ** Execute review_query & Output ** 
     elif command_dic["query_type"] == "read-review":
-        # Execute review_query
+
         results = review_query(command_dic["style"], command_dic["comment"], command_dic["limit"])
 
         # Template for the output
         template = "{0:2} {1:20} {2:20} {3:20}"
-
-
 
         # Print rows
         index = 1
         for row in results:
             # Print column names
             print(template.format("#".center(2), "Name".center(20), "Style".center(20), "Rating".center(10)))
-            # Print the rows            
+            # Print the rows
             (Name, Rating, Style, Comment) = row
             print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10)))
             print(" "*4, Comment)
