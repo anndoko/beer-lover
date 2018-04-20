@@ -1,6 +1,12 @@
 Hello, Beer Lover!
 Here are the commands available:
 
+view-styles
+    Description:
+
+view-top-beers
+    Description:
+
 beers
     * style=<#> [default: none]
     Specifies one of the following styles to narrow down your search.

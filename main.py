@@ -1,6 +1,8 @@
 import sqlite3
 import requests
 import json
+import plotly.plotly as py
+import plotly.graph_objs as go
 from bs4 import BeautifulSoup
 
 # ---------- Classes ----------
@@ -136,7 +138,7 @@ def get_beer_data(style_data_lst):
             }
 
             # Style
-            beer_dic["Style"] = lst
+            beer_dic['Style'] = lst
 
             # Name
             beer_dic['Name'] = soup.find('h1').text
@@ -306,34 +308,125 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # ---------- Queries ----------
+# Plotly: Bar
+def plotly_style():
+    # Connect db
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # Form the statement
+    statement = '''
+        SELECT Styles.Name, ROUND(AVG(ABV), 2) AS abv, ROUND(AVG(Aroma), 2) AS aroma, ROUND(AVG(Flavor), 2) AS flavor, ROUND(AVG(Mouthfeel), 2) AS mouthfeel
+        FROM Beers
+        JOIN Styles ON Beers.StyleId = Styles.Id
+        GROUP BY Styles.Name
+        ORDER BY abv ASC
+    '''
+
+    # Excute the statement
+    rows = cur.execute(statement).fetchall()
+    conn.commit()
+
+    # Plotly
+    # Create lists
+    style_lst = []
+    abv_lst = []
+    aroma_lst = []
+    flavor_lst = []
+    mouthfeel_lst = []
+
+    # Add data into each list
+    for row in rows:
+        style_lst.append(row[0])
+        abv_lst.append(row[1])
+        aroma_lst.append(row[2])
+        flavor_lst.append(row[3])
+        mouthfeel_lst.append(row[4])
+
+
+    # Three bars (abv, aroma, flavor, mouthfeel) for each style
+    aroma = go.Bar(
+        x=style_lst,
+        y=aroma_lst,
+        name="Aroma",
+        # text=aroma_lst,
+        textposition = 'auto',
+        marker=dict(
+            color='rgb(85, 0, 0)',
+            ),
+        opacity=0.6
+    )
+
+    flavor = go.Bar(
+        x=style_lst,
+        y=flavor_lst,
+        name="Flavor",
+        # text=flavor_lst,
+        textposition = 'auto',
+        marker=dict(
+            color='rgb(128, 21, 21)',
+            ),
+        opacity=0.6
+    )
+
+    mouthfeel = go.Bar(
+        x=style_lst,
+        y=mouthfeel_lst,
+        name="Mouthfeel",
+        # text=mouthfeel_lst,
+        textposition = 'auto',
+        marker=dict(
+            color='rgb(255, 170, 170)',
+            ),
+        opacity=0.6
+    )
+
+    abv = go.Bar(
+        x=style_lst,
+        y=abv_lst,
+        name="ABV (Alcohol by Volume)",
+        # text=abv_lst,
+        textposition = 'auto',
+        marker=dict(
+            color='rgb(232, 0, 70)',
+            ),
+        opacity=0.6
+    )
+
+    data = [aroma, flavor, mouthfeel, abv]
+
+    py.plot(data, filename='grouped-bar-direct-labels')
+
+
+
 # Beers query
-def beers_query(style="", criteria="rating", sorting_order="top", limit="10"):
+def beers_query(style='', criteria='rating', sorting_order='top', limit='10'):
     # Connect db
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
     # -- Form the statement --
-    statement = "SELECT Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU "
-    statement += "FROM Beers "
+    statement = 'SELECT Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU '
+    statement += 'FROM Beers '
 
     # Style
-    if style != "":
-        statement += "WHERE StyleId = {} ".format(str(style))
+    if style != '':
+        statement += 'WHERE StyleId = {} '.format(str(style))
 
     # rating / abv
-    if criteria == "rating":
-        statement += "ORDER BY {} ".format("Rating")
-    elif criteria == "abv":
-        statement += "ORDER BY {} ".format("ABV")
+    if criteria == 'rating':
+        statement += 'ORDER BY {} '.format('Rating')
+    elif criteria == 'abv':
+        statement += 'ORDER BY {} '.format('ABV')
 
     # top: DESC / bottom ASC
-    if sorting_order == "top":
-        statement += "{} ".format("DESC")
-    elif sorting_order == "bottom":
-        statement += "{} ".format("ASC")
+    if sorting_order == 'top':
+        statement += '{} '.format('DESC')
+    elif sorting_order == 'bottom':
+        statement += '{} '.format('ASC')
 
     # Limit
-    statement += "LIMIT {} ".format(limit)
+    statement += 'LIMIT {} '.format(limit)
 
     # Excute the statement
     rows = cur.execute(statement).fetchall()
@@ -347,21 +440,21 @@ def beers_query(style="", criteria="rating", sorting_order="top", limit="10"):
     return results
 
 # Review query
-def review_query(style="", comment="overall", limit="10"):
+def review_query(style='', comment='overall', limit='10'):
     # Connect db
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
     # -- Form the statement --
-    statement = "SELECT Name, Rating, Style, {} ".format(comment.title() + "Comment")
-    statement += "FROM Beers "
+    statement = 'SELECT Name, Rating, Style, {} '.format(comment.title() + 'Comment')
+    statement += 'FROM Beers '
 
     # Style
-    if style != "":
-        statement += "WHERE StyleId = {} ".format(str(style))
+    if style != '':
+        statement += 'WHERE StyleId = {} '.format(str(style))
 
     # Limit
-    statement += "LIMIT {} ".format(limit)
+    statement += 'LIMIT {} '.format(limit)
 
     # Excute the statement
     rows = cur.execute(statement).fetchall()
@@ -382,64 +475,64 @@ def process_command(command):
     if_valid = True
 
     # Lists of valid words
-    query_type_lst = ["beers", "read-review", "exit"]
-    style_lst = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    sorting_criteria_lst = ["rating", "abv"]
-    sorting_order_lst = ["top", "bottom"]
-    comment_type_lst = ["overall", "aroma", "flavor"]
+    query_type_lst = ['beers', 'read-review', 'view-styles', 'exit']
+    style_lst = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+    sorting_criteria_lst = ['rating', 'abv']
+    sorting_order_lst = ['top', 'bottom']
+    comment_type_lst = ['overall', 'aroma', 'flavor']
 
     # -- Process the command line --
     # Lower case the command & make it a list for processing
     command_lst = command.lower().split()
 
     command_dic = {
-        "query_type": "",
-        "style": "",
-        "comment": "overall",
-        "criteria": "rating",
-        "sorting_order": "top",
-        "limit": "10",
+        'query_type': '',
+        'style': '',
+        'comment': 'overall',
+        'criteria': 'rating',
+        'sorting_order': 'top',
+        'limit': '10',
     }
 
     for command in command_lst:
         # query type
         if command in query_type_lst:
-            command_dic["query_type"] = command
+            command_dic['query_type'] = command
         # criteria
         elif command in sorting_criteria_lst:
-            command_dic["criteria"] = command
+            command_dic['criteria'] = command
         elif command in comment_type_lst:
-            command_dic["comment"] = command
+            command_dic['comment'] = command
         # number of matches & specifications
-        elif "=" in command:
-            lst = command.split("=")
+        elif '=' in command:
+            lst = command.split('=')
             for ele in lst:
                 # top/bottom & limit
                 # style
                 if ele in style_lst:
-                    command_dic["style"] = lst[1]
+                    command_dic['style'] = lst[1]
                 elif ele in sorting_order_lst:
-                    command_dic["sorting_order"] = lst[0]
-                    command_dic["limit"] = lst[1]
+                    command_dic['sorting_order'] = lst[0]
+                    command_dic['limit'] = lst[1]
         else:
             if_valid = False
 
     if if_valid == False:
-        print("Command not recognized: ", command)
+        print('Command not recognized: ', command)
 
     return command_dic
 
 def process_data(command_dic):
     # ** Execute beers_query & Output **
-    if command_dic["query_type"] == "beers":
+    if command_dic['query_type'] == 'beers':
 
-        results = beers_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
+        results = beers_query(command_dic['style'], command_dic['criteria'], command_dic['sorting_order'], command_dic['limit'])
 
         # Template for the output
-        template = "{0:2} {1:20} {2:20} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10}"
+        template = '{0:2} {1:20} {2:20} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10}'
 
         # Print column names
-        print(template.format("#".center(2), "Name".center(20), "Style".center(20), "Rating".center(10), "Aroma".center(10), "Appearance".center(10), "Flavor".center(10), "Mouthfeel".center(10), "ABV".center(10), "IBU".center(10)))
+        print(template.format('#'.center(2), 'Name'.center(20), 'Style'.center(20), 'Rating'.center(10), 'Aroma'.center(10), 'Appearance'.center(10), 'Flavor'.center(10), 'Mouthfeel'.center(10), 'ABV'.center(10), 'IBU'.center(10)))
 
         # Print rows
         index = 1
@@ -449,24 +542,29 @@ def process_data(command_dic):
             index += 1
 
     # ** Execute review_query & Output **
-    elif command_dic["query_type"] == "read-review":
+    elif command_dic['query_type'] == 'read-review':
 
-        results = review_query(command_dic["style"], command_dic["comment"], command_dic["limit"])
+        results = review_query(command_dic['style'], command_dic['comment'], command_dic['limit'])
 
         # Template for the output
-        template = "{0:2} {1:20} {2:20} {3:20}"
+        template = '{0:2} {1:20} {2:20} {3:20}'
 
         # Print rows
         index = 1
         for row in results:
             # Print column names
-            print(template.format("#".center(2), "Name".center(20), "Style".center(20), "Rating".center(10)))
+            print(template.format('#'.center(2), 'Name'.center(20), 'Style'.center(20), 'Rating'.center(10)))
             # Print the rows
             (Name, Rating, Style, Comment) = row
             print(template.format(str(index).center(2), str_output(Name).center(20), str_output(Style).center(20), str(Rating).center(10)))
-            print(" "*4, Comment)
-            print("-"*20)
+            print(' '*4, Comment)
+            print('-'*20)
             index += 1
+
+    # ** Execute plotly (Bar chart for styles) **
+    elif command_dic['query_type'] == 'view-styles':
+        plotly_style()
+
 
 # Show the menu
 def load_menu_text():
@@ -488,17 +586,17 @@ def interactive_prompt():
             continue
 
 # ---------- Program ----------
-if __name__=="__main__":
-    # Run the functions to crawl & scrape the website
-    style_data = get_style_data()
-    beer_data = get_beer_data(style_data)
+if __name__=='__main__':
+    # # Run the functions to crawl & scrape the website
+    # style_data = get_style_data()
+    # beer_data = get_beer_data(style_data)
+    #
+    # # Run the function to create database
+    # init_db_tables()
+    #
+    # # Run the functions to insert data
+    # init_db_style_data(style_data)
+    # init_db_beer_data(beer_data)
 
-    # Run the function to create database
-    init_db_tables()
-
-    # Run the functions to insert data
-    init_db_style_data(style_data)
-    init_db_beer_data(beer_data)
-
-    # # Start the interaction
-    # interactive_prompt()
+    # Start the interaction
+    interactive_prompt()
