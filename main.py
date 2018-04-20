@@ -501,14 +501,21 @@ def plotly_reviews():
 
 
 # ---------- Functions for Interactions ----------
-
+# Format the output
+def str_output(string_output):
+    if len(string_output) > 12:
+        formatted_output = string_output[:12] + "..."
+    else:
+        formatted_output = string_output
+    return formatted_output
+    
 # Process the command
 def process_command(command):
     # Set if_valid to check if the command is valid
     if_valid = True
 
     # Lists of valid words
-    query_type_lst = ['beers', 'read-review', 'view-styles', 'exit']
+    query_type_lst = ['beers', 'read-review', 'view-styles', 'view-reviews-%', 'exit']
     style_lst = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
     sorting_criteria_lst = ['rating', 'abv']
     sorting_order_lst = ['top', 'bottom']
@@ -597,7 +604,7 @@ def process_data(command_dic):
     # ** Execute plotly (Bar chart for styles) **
     elif command_dic['query_type'] == 'view-styles':
         plotly_style()
-    elif command_dic['query_type'] == 'view-reviews-%';
+    elif command_dic['query_type'] == 'view-reviews-%':
         plotly_reviews()
 
 # Show the menu
