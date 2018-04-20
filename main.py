@@ -308,6 +308,75 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # ---------- Queries ----------
+
+# Beers query
+def beers_query(style='', criteria='rating', sorting_order='top', limit='10'):
+    # Connect db
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # -- Form the statement --
+    statement = 'SELECT Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU '
+    statement += 'FROM Beers '
+
+    # Style
+    if style != '':
+        statement += 'WHERE StyleId = {} '.format(str(style))
+
+    # rating / abv
+    if criteria == 'rating':
+        statement += 'ORDER BY {} '.format('Rating')
+    elif criteria == 'abv':
+        statement += 'ORDER BY {} '.format('ABV')
+
+    # top: DESC / bottom ASC
+    if sorting_order == 'top':
+        statement += '{} '.format('DESC')
+    elif sorting_order == 'bottom':
+        statement += '{} '.format('ASC')
+
+    # Limit
+    statement += 'LIMIT {} '.format(limit)
+
+    # Excute the statement
+    rows = cur.execute(statement).fetchall()
+    conn.commit()
+
+    # Add results to a list
+    results = []
+    for row in rows:
+        results.append(row)
+
+    return results
+
+# Review query
+def review_query(style='', comment='overall', limit='10'):
+    # Connect db
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # -- Form the statement --
+    statement = 'SELECT Name, Rating, Style, {} '.format(comment.title() + 'Comment')
+    statement += 'FROM Beers '
+
+    # Style
+    if style != '':
+        statement += 'WHERE StyleId = {} '.format(str(style))
+
+    # Limit
+    statement += 'LIMIT {} '.format(limit)
+
+    # Excute the statement
+    rows = cur.execute(statement).fetchall()
+    conn.commit()
+
+    # Add results to a list
+    results = []
+    for row in rows:
+        results.append(row)
+
+    return results
+
 # Plotly: Bar
 def plotly_style():
     # Connect db
@@ -397,75 +466,39 @@ def plotly_style():
 
     py.plot(data, filename='grouped-bar-direct-labels')
 
-
-
-# Beers query
-def beers_query(style='', criteria='rating', sorting_order='top', limit='10'):
+# Plotly: Pie
+def plotly_reviews():
     # Connect db
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
-    # -- Form the statement --
-    statement = 'SELECT Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU '
-    statement += 'FROM Beers '
-
-    # Style
-    if style != '':
-        statement += 'WHERE StyleId = {} '.format(str(style))
-
-    # rating / abv
-    if criteria == 'rating':
-        statement += 'ORDER BY {} '.format('Rating')
-    elif criteria == 'abv':
-        statement += 'ORDER BY {} '.format('ABV')
-
-    # top: DESC / bottom ASC
-    if sorting_order == 'top':
-        statement += '{} '.format('DESC')
-    elif sorting_order == 'bottom':
-        statement += '{} '.format('ASC')
-
-    # Limit
-    statement += 'LIMIT {} '.format(limit)
+    # Form the statement
+    statement = '''
+        SELECT Styles.Name, COUNT(Beers.Id)
+        FROM Beers
+        JOIN Styles ON Beers.StyleId = Styles.Id
+        GROUP BY Styles.Name
+        ORDER BY COUNT(Beers.Id) DESC
+    '''
 
     # Excute the statement
     rows = cur.execute(statement).fetchall()
     conn.commit()
 
-    # Add results to a list
-    results = []
+    # Plotly
+    # Create lists
+    style_lst = []
+    review_count_lst = []
+
+    # Add data into each list
     for row in rows:
-        results.append(row)
+        style_lst.append(row[0])
+        review_count_lst.append(row[1])
 
-    return results
+    trace = go.Pie(labels=style_lst, values=review_count_lst)
 
-# Review query
-def review_query(style='', comment='overall', limit='10'):
-    # Connect db
-    conn = sqlite3.connect(DBNAME)
-    cur = conn.cursor()
+    py.plot([trace], filename='basic_pie_chart')
 
-    # -- Form the statement --
-    statement = 'SELECT Name, Rating, Style, {} '.format(comment.title() + 'Comment')
-    statement += 'FROM Beers '
-
-    # Style
-    if style != '':
-        statement += 'WHERE StyleId = {} '.format(str(style))
-
-    # Limit
-    statement += 'LIMIT {} '.format(limit)
-
-    # Excute the statement
-    rows = cur.execute(statement).fetchall()
-    conn.commit()
-
-    # Add results to a list
-    results = []
-    for row in rows:
-        results.append(row)
-
-    return results
 
 # ---------- Functions for Interactions ----------
 
@@ -564,7 +597,8 @@ def process_data(command_dic):
     # ** Execute plotly (Bar chart for styles) **
     elif command_dic['query_type'] == 'view-styles':
         plotly_style()
-
+    elif command_dic['query_type'] == 'view-reviews-%';
+        plotly_reviews()
 
 # Show the menu
 def load_menu_text():

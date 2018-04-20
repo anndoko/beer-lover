@@ -4,7 +4,7 @@ Here are the commands available:
 view-styles
     Description:
 
-view-top-beers
+view-reviews-%
     Description:
 
 beers
