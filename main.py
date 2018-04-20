@@ -250,8 +250,8 @@ def init_db_tables():
             'Mouthfeel' INTEGER,
             'Style' TEXT,
             'StyleId' INTEGER,
-            'ABV' INTEGER,
-            'IBU' INTEGER,
+            'ABV' FLOAT,
+            'IBU' FLOAT,
             'AromaComment' TEXT,
             'FlavorComment' TEXT,
             'OverallComment' TEXT
@@ -490,16 +490,16 @@ def interactive_prompt():
 
 # ---------- Program ----------
 if __name__=="__main__":
-    # # Run the functions to crawl & scrape the website
-    # style_data = get_style_data()
-    # beer_data = get_beer_data(style_data)
-    #
-    # # Run the function to create database
-    # init_db_tables()
-    #
-    # # Run the functions to insert data
-    # init_db_style_data(style_data)
-    # init_db_beer_data(beer_data)
+    # Run the functions to crawl & scrape the website
+    style_data = get_style_data()
+    beer_data = get_beer_data(style_data)
 
-    # Start the interaction
-    interactive_prompt()
+    # Run the function to create database
+    init_db_tables()
+
+    # Run the functions to insert data
+    init_db_style_data(style_data)
+    init_db_beer_data(beer_data)
+
+    # # Start the interaction
+    # interactive_prompt()

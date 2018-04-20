@@ -4,10 +4,58 @@ from main import *
 # Database
 class TestDatabase(unittest.TestCase):
     def test_style_table(self):
-        pass
+        # Connect to DB
+        conn = sqlite3.connect(DBNAME)
+        cur = conn.cursor()
+
+        # Form the statement to get data from the table
+        select_statement = '''
+        SELECT *
+        FROM Styles
+        '''
+
+        # Execute the statement
+        results = cur.execute(select_statement)
+        result = results.fetchone()
+        conn.close()
+
+        # Check the data types
+        self.assertIs(type(result[0]), int)
+        self.assertIs(type(result[1]), str)
 
     def test_beer_table(self):
-        pass
+        # Connect to DB
+        conn = sqlite3.connect(DBNAME)
+        cur = conn.cursor()
+
+        # Form the statement to get data from the table
+        select_statement = '''
+        SELECT *
+        FROM Beers
+        '''
+
+        # Execute the statement
+        results = cur.execute(select_statement)
+        result = results.fetchall()
+        conn.close()
+        # Check if the table contains more than 100 entries
+        self.assertGreaterEqual(len(result), 100)
+        # Check the data types
+        self.assertIs(type(result[0][0]), int)
+        self.assertIs(type(result[0][1]), str)
+        self.assertIs(type(result[0][2]), str)
+        self.assertIs(type(result[0][3]), int)
+        self.assertIs(type(result[0][4]), int)
+        self.assertIs(type(result[0][5]), int)
+        self.assertIs(type(result[0][6]), int)
+        self.assertIs(type(result[0][7]), int)
+        self.assertIs(type(result[0][8]), str)
+        self.assertIs(type(result[0][9]), int)
+        self.assertIs(type(result[0][10]), float)
+        self.assertIs(type(result[0][11]), float)
+        self.assertIs(type(result[0][12]), str)
+        self.assertIs(type(result[0][13]), str)
+        self.assertIs(type(result[0][14]), str)
 
 # Classes
 class TestClasses(unittest.TestCase):
@@ -20,8 +68,9 @@ class TestClasses(unittest.TestCase):
         # Create Style instance
         result = Style(test_dic)
 
-        # Check the instance and instance variables/values
-        self.assertIsInstance(result, Style) # check if it's an instance of Style
+        # Check if it's an instance of Style
+        self.assertIsInstance(result, Style)
+        # Check the instance variables/values
         self.assertEqual(result.name, 'test-style')
         self.assertEqual(result.node, '/test-node')
 
@@ -46,8 +95,10 @@ class TestClasses(unittest.TestCase):
         # Create Beer instance
         result = Beer(test_dic)
 
-        # Check the instance and instance variables/values
-        self.assertIsInstance(result, Beer) # check if it's an instance of Beer
+
+        # Check if it's an instance of Beer
+        self.assertIsInstance(result, Beer)
+        # Check the instance variables/values
         self.assertEqual(result.name, 'test-beer')
         self.assertEqual(result.image, 'test-img-link')
         self.assertEqual(result.rating, 100)
