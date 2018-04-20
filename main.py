@@ -305,13 +305,13 @@ def init_db_beer_data(lst):
         conn.commit()
 
 # ---------- Queries ----------
-def beer_query(style="", criteria="rating", sorting_order="top", limit="10"):
+def beers_query(style="", criteria="rating", sorting_order="top", limit="10"):
     # Connect db
     conn = sqlite3.connect(DBNAME)
     cur = conn.cursor()
 
     # -- Form the statement --
-    statement = "SELECT * "
+    statement = "SELECT Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU "
     statement += "FROM Beers "
 
     # rating / abv
@@ -330,7 +330,7 @@ def beer_query(style="", criteria="rating", sorting_order="top", limit="10"):
     statement += "LIMIT {}".format(limit)
 
     # Excute the statement
-    print(statement)
+    # print(statement)
 
     rows = cur.execute(statement).fetchall()
     conn.commit()
@@ -344,6 +344,14 @@ def beer_query(style="", criteria="rating", sorting_order="top", limit="10"):
 
 
 # ---------- Interactive ----------
+# Format the output
+def str_output(string_output):
+    if len(string_output) > 20:
+        formatted_output = string_output[:20] + "..."
+    else:
+        formatted_output = string_output
+    return formatted_output
+
 # Process the command
 def process_command(command):
     # Set if_valid to check if the command is valid
@@ -395,8 +403,16 @@ def process_command(command):
 
 def process_data(command_dic):
     if command_dic["query_type"] == "beers":
-        print("Process data: beers")
-        beer_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
+        # Execute beers_query
+        results = beers_query(command_dic["style"], command_dic["criteria"], command_dic["sorting_order"], command_dic["limit"])
+
+        # Output
+        template = "{0:30} {1:30} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10}"
+        print(template.format("Name".center(30), "Style".center(30), "Rating".center(10), "Aroma".center(10), "Appearance".center(10), "Flavor".center(10), "Mouthfeel".center(10), "ABV".center(10), "IBU".center(10)))
+        for row in results:
+            (Name, Rating, Aroma, Appearance, Flavor, Mouthfeel, Style, ABV, IBU) = row
+            print(template.format(str_output(Name), str_output(Style), str(Rating).center(10), str(Aroma).center(10), str(Appearance).center(10), str(Flavor).center(10), str(Mouthfeel).center(10), str(ABV).center(10), str(IBU).center(10)))
+
     elif command_dic["query_type"] == "read-more":
         print("Process data: read more")
     else:
@@ -420,6 +436,14 @@ def interactive_prompt():
         if response == 'menu':
             print(menu_text)
             continue
+
+
+
+
+
+
+
+
 
 # ---------- Program ----------
 if __name__=="__main__":
