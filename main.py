@@ -1,4 +1,3 @@
-# import modules
 import sqlite3
 import requests
 import json
@@ -502,5 +501,5 @@ if __name__=="__main__":
     # init_db_style_data(style_data)
     # init_db_beer_data(beer_data)
 
-    Start the interaction
+    # Start the interaction
     interactive_prompt()
