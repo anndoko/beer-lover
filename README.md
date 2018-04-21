@@ -165,7 +165,7 @@ def process_command(command):
 
 - **view-styles:** 
   
-  Open the Plotly graph in the webbrowser; the bar chart displays the average ABV (Alcohol By Volume), aroma, flavor, and Mouthfeel.  
+  Open the Plotly graph in the webbrowser; the bar chart displays the average ABV (Alcohol By Volume), aroma, flavor, and mouthfeel.  
 
 - **view-reviews-%:** 
   
